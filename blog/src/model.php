@@ -1,26 +1,67 @@
 <?php
 
-function getPosts() {
-    // We connect to the database.
-    try {
-        $database = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'shaun', 'cRadoc!54');
-    } catch(Exception $e) {
-        die('Erreur : '.$e->getMessage());
-    }
-
+function getPosts() : array {
+    $database = dbConnect();
     // We retrieve the 5 last blog posts.
     $statement = $database->query(
-        "SELECT id, titre, contenu, DATE_FORMAT(date_creation, '%d/%m/%Y à %Hh%imin%ss') AS date_creation_fr FROM billets ORDER BY date_creation DESC LIMIT 0, 5"
+        "SELECT id, title, content, DATE_FORMAT(creation_date, '%d/%m/%Y à %Hh%imin%ss') AS french_creation_date FROM posts ORDER BY creation_date DESC LIMIT 0, 5"
     );
     $posts = [];
     while (($row = $statement->fetch())) {
         $post = [
-            'title' => $row['titre'],
-            'french_creation_date' => $row['date_creation_fr'],
-            'content' => $row['contenu'],
+            'title' => $row['title'],
+            'french_creation_date' => $row['french_creation_date'],
+            'content' => $row['content'],
+            'identifier' => $row['id'],
         ];
 
         $posts[] = $post;
     }
     return $posts;
+}
+
+function getPost($identifier) : array {
+    $database = dbConnect();
+    $statement = $database->prepare(
+        "SELECT id, title, content, DATE_FORMAT(creation_date, '%d/%m/%Y à %Hh%imin%ss') AS french_creation_date FROM posts WHERE id = ?"
+    );
+    $statement->execute([$identifier]);
+
+    $row = $statement->fetch();
+    $post = [
+        'title' => $row['title'],
+        'french_creation_date' => $row['french_creation_date'],
+        'content' => $row['content'],
+    ];
+    return $post;
+}
+
+function getComments($identifier) : array {
+    $database = dbConnect();
+    $statement = $database->prepare(
+        "SELECT comment_id, author, comment, DATE_FORMAT(creation_date, '%d/%m/%Y à %Hh%imin%ss') AS 
+        french_creation_date FROM comments WHERE post_id = ? ORDER BY comment_date DESC"
+    );
+
+    $statement->execute([$identifier]);
+
+    $comments = [];
+    while ($row = $statement->fetch()) {
+        $comment = [
+            'author' => $row['author'],
+            'french_creation_date' => $row['french_creation_date'],
+            'comment' => $row['comment'],
+        ];
+        $comments = $comment;
+    }
+    return $comments;
+}
+
+function dbConnect() {
+    try {
+        $database = new PDO('mysql:host=localhost;dbname=blog;charset=utf8', 'shaun', 'cRadoc!54');
+        return $database;
+    } catch(Exception $e) {
+        die('Erreur : '.$e->getMessage());
+    }
 }
