@@ -39,8 +39,8 @@ function getPost($identifier) : array {
 function getComments($identifier) : array {
     $database = dbConnect();
     $statement = $database->prepare(
-        "SELECT comment_id, author, comment, DATE_FORMAT(creation_date, '%d/%m/%Y à %Hh%imin%ss') AS 
-        french_creation_date FROM comments WHERE post_id = ? ORDER BY comment_date DESC"
+        "SELECT comment_id, author, comment, DATE_FORMAT(comment_date, '%d/%m/%Y à %Hh%imin%ss') AS 
+        french_comment_date FROM comments WHERE post_id = ? ORDER BY comment_date DESC"
     );
 
     $statement->execute([$identifier]);
@@ -49,10 +49,10 @@ function getComments($identifier) : array {
     while ($row = $statement->fetch()) {
         $comment = [
             'author' => $row['author'],
-            'french_creation_date' => $row['french_creation_date'],
+            'french_comment_date' => $row['french_comment_date'],
             'comment' => $row['comment'],
         ];
-        $comments = $comment;
+        $comments[] = $comment;
     }
     return $comments;
 }
