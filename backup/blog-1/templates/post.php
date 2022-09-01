@@ -17,7 +17,7 @@
 
 <h2>Commentaires</h2>
 
-<form action="index.php?action=addComment&id=<?= $post['identifier'] ?>" method="post">
+<form action="index.php?action=post&id=<?= $_GET['id'] ?>" method="post">
     <label>Votre commentaire</label>
     <br/>
     <textarea autocomplete="off" name="comment" placeholder="Restez respectueux s'il vous plait."></textarea>
